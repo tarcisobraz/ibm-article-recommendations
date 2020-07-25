@@ -204,7 +204,7 @@ class Recommender():
             print('Valid options: {article,user}')
             return
 
-        rec_names = get_article_names(recs_ids, self.interactions_df)
+        rec_names = get_article_names(recs_ids, self.all_articles, 'doc_description')
 
         return(recs_ids, recs_names)
 
@@ -214,9 +214,9 @@ if __name__ == '__main__':
     # Read in the datasets
     interactions = pd.read_csv('data/clean_interactions.csv')
     articles = pd.read_csv('data/clean_articles_all.csv')
+    unique_users = pd.unique(interactions.user_id)
     
     rec = Recommender(articles, interactions)
-    #rec = Recommender(articles.iloc[:1000,:], interactions.iloc[:5000,:])
     rec.fit()
     
     #Testing SVD prediction evaluation function
@@ -273,29 +273,44 @@ if __name__ == '__main__':
 #         user_id = interactions.iloc[i,:].user_id
 #         print('Making Recommendations for User ID:', user_id)
 #         recs_dict[user_id] = rec.make_recs(user_id, 'user', rec_type=3, verbose=True)
-        
-
-    #Testing Movie recommendation for users outside the dataset
-    #print(rec.make_recs(40000, 'user'))
     
     #Saving all user recommendations using User-User Collaborative Filtering Recommendation
-#     unique_users = pd.unique(interactions.user_id)
 #     collab_filtering_users_recs = {}
 #     for i in range(unique_users.shape[0]):
 #         user_id = unique_users[i]
 #         print('Making Recommendations for User ID:', user_id)
-#         recs_dict[user_id] = rec.make_recs(user_id, 'user')
+#         collab_filtering_users_recs[user_id] = rec.make_recs(user_id, 'user')
     
 #     with open('data/collab_filtering_users_recs.pickle', 'wb') as handle:
 #         pickle.dump(collab_filtering_users_recs, handle, protocol=pickle.HIGHEST_PROTOCOL)
         
     #Saving all user recommendations using Content-Based Recommendation
-    unique_users = pd.unique(interactions.user_id)
-    content_based_users_recs = {}
-    for i in range(unique_users.shape[0]):
-        user_id = unique_users[i]
-        print('Making Recommendations for User ID:', user_id)
-        recs_dict[user_id] = rec.make_recs(user_id, 'user', rec_type=2)
+#     content_based_users_recs = {}
+#     for i in range(unique_users.shape[0]):
+#         user_id = unique_users[i]
+#         print('Making Recommendations for User ID:', user_id)
+#         content_based_users_recs[user_id] = rec.make_recs(user_id, 'user', rec_type=2)
     
-    with open('data/content_based_users_recs.pickle', 'wb') as handle:
-        pickle.dump(content_based_users_recs, handle, protocol=pickle.HIGHEST_PROTOCOL)
+#     with open('data/content_based_users_recs.pickle', 'wb') as handle:
+#         pickle.dump(content_based_users_recs, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        
+        
+    #Saving all user recommendations using SVD (Matrix Factorization) Recommendation
+#     svd_users_recs = {}
+#     for i in range(unique_users.shape[0]):
+#         user_id = unique_users[i]
+#         print('Making Recommendations for User ID:', user_id)
+#         svd_users_recs[user_id] = rec.make_recs(user_id, 'user', rec_type=3)
+    
+#     with open('data/svd_users_recs.pickle', 'wb') as handle:
+#         pickle.dump(svd_users_recs, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    #Saving all article recommendations using Content-Based Recommendation
+#     content_based_articles_recs = {}
+#     for i in range(rec.all_articles.shape[0]):
+#         article_id = rec.all_articles.iloc[i,:].article_id
+#         print('Making Recommendations for Article ID:', article_id)
+#         content_based_articles_recs[article_id] = rec.make_recs(article_id, 'article')
+    
+#     with open('data/content_based_articles_recs.pickle', 'wb') as handle:
+#         pickle.dump(content_based_articles_recs, handle, protocol=pickle.HIGHEST_PROTOCOL)

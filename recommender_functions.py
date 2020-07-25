@@ -141,20 +141,20 @@ def find_similar_users(user_id, user_item):
        
     return most_similar_users # return a list of the users in order from most to least similar
 
-def get_article_names(article_ids, df):
+def get_article_names(article_ids, articles_df, name_column):
     '''
     INPUT:
     article_ids - (list) a list of article ids
-    df - (pandas dataframe) df as defined at the top of the notebook
+    articles_df - (pandas dataframe) dataframe comprising articles information (at least id and name)
     
     OUTPUT:
     article_names - (list) a list of article names associated with the list of article ids 
-                    (this is identified by the title column)
+                    (this is identified by the name column)
     '''
     
-    unique_articles = df[['article_id','title']].drop_duplicates() \
+    unique_articles = articles_df[['article_id',name_column]].drop_duplicates() \
                         .set_index('article_id')
-    article_names = unique_articles.loc[article_ids,:].title.values
+    article_names = unique_articles.loc[article_ids,:][name_column].values
     
     return article_names # Return the article names associated with list of article ids
 
@@ -177,7 +177,7 @@ def get_user_articles(user_id, user_item, interactions_df):
     '''
     user_row = user_item.iloc[user_id - 1,:]
     article_ids = user_row[user_row > 0].keys().astype(str).values
-    article_names = get_article_names(article_ids, interactions_df)
+    article_names = get_article_names(article_ids, interactions_df, 'title')
     
     return article_ids, article_names # return the ids and names
 
