@@ -91,6 +91,8 @@ class Recommender():
         self : object
         user_id : int, ID of user for whom interaction prediction will be performed
         article_id : int, ID of article for whom interaction prediction will be performed
+        num_latent_features - int, number of latent features to take into consideration
+        verbose - boolean, whether or not to print steps logs to std_out
         
         Returns
         -------
@@ -104,6 +106,23 @@ class Recommender():
     
     def predict_evaluate(self, train_interactions_df, test_interactions_df, 
                          num_latent_features, verbose=False):
+        '''
+        Trains an SVD Recommender model based on a given train dataset and uses it to
+        predict whether there will be interactions in the given test set. 
+        Then, evaluates the prediction by comparing to the actual interaction values.
+        
+        Parameters
+        ----------
+        self : object
+        train_interactions_df : pandas.DataFrame, dataframe with interactions selected for training
+        test_interactions_df : pandas.DataFrame, dataframe with interactions selected for testing
+        num_latent_features - int, number of latent features to take into consideration
+        verbose - boolean, whether or not to print steps logs to std_out
+        
+        Returns
+        -------
+        acc : float, accuracy of the model on the test set
+        '''
         acc = svd_predict_evaluate(train_interactions_df, test_interactions_df, 
                                    num_latent_features, verbose=verbose)
         return acc
@@ -118,6 +137,7 @@ class Recommender():
         self : object
         entity_id : int, ID of entity for whom movie recommendation will be performed
         entity_type : string, type of entity (user/article) for whom article recommendation will be performed
+        num_recs : int, number of recommended articles to return
         rec_type : int, type of recommendation algorithm to be used:
                         1 - User-User Collaborative Filtering Recommendation
                         2 - Content-Based Recommendation
@@ -167,7 +187,7 @@ class Recommender():
                 recs_ids = make_svd_recs(entity_id, self.user_article_matrix_, 
                                          self.svd_user_mat_, self.svd_article_mat_,
                                          self.svd_latent_factors_mat_, num_latent_features=10, 
-                                         rec_num=5, verbose=verbose)
+                                         rec_num=num_recs, verbose=verbose)
             
             else:
                 print('Invalid Rec Type: {}'.format(rec_type))
@@ -182,13 +202,6 @@ class Recommender():
             print('Valid options: {article,user}')
             return
 
-
-        #         recs_ids, recs_names, used_svd = make_recommendations(
-        #             entity_id, entity_type, self.user_article_matrix_, 
-        #             self.ranked_articles_, self.articles_df, 
-        #             self.articles_sim_matrix_, self.svd_user_mat_, 
-        #             self.svd_article_mat_, self.svd_latent_factors_mat_)
-        
         rec_names = get_article_names(recs_ids, self.interactions_df)
 
         return(recs_ids, recs_names)
@@ -203,9 +216,6 @@ if __name__ == '__main__':
     rec = Recommender(articles, interactions)
     #rec = Recommender(articles.iloc[:1000,:], interactions.iloc[:5000,:])
     rec.fit()
-    
-    #Testing Movie recommendation for within the dataset
-    #print(rec.make_recs(1, 'user'))
     
     #Testing SVD prediction evaluation function
     df_train = interactions.head(40000).copy()

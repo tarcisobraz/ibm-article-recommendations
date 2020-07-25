@@ -333,6 +333,7 @@ def find_similar_articles(article_id, articles_df, article_sim_mat,
     article_id - int, an article_id 
     articles_df - pandas.DataFrame, dataframe containing article_id and doc_description columns
     article_sim_mat - numpy.array, a square matrix with num_articles rows and columns, where
+    num_recs - int, number of recommended articles to return
     every cell represents the cosine similarity between the respective (row and column) articles
     min_similarity_threshold - int, minimum similarity value so the articles can be considered similar
     verbose - boolean, whether or not to print steps logs to std_out
@@ -369,6 +370,15 @@ def find_similar_articles(article_id, articles_df, article_sim_mat,
         return []
     
 def build_user_articles_interactions(interactions_df):
+    '''
+    INPUT:
+    interactions_df - pandas.DataFrame, dataframe containing interactions between users and articles
+    
+    OUTPUT:
+    user_articles_interactions - pandas.DataFrame, a dataframe which holds the total 
+    number of interactions between a user-article pair
+    
+    '''
     user_articles_interactions = interactions_df.groupby(['user_id','article_id']) \
                                     .interaction.count() \
                                     .reset_index() \
@@ -434,7 +444,6 @@ def make_content_recs2(user_id, articles_df, user_articles_interactions,
                 break
 
     return user_recs
-# Matrix Factorization Recommendation (SVD)
 
 def create_test_and_train_user_item(df_train, df_test):
     '''
@@ -460,6 +469,16 @@ def create_test_and_train_user_item(df_train, df_test):
     return user_item_train, user_item_test, test_idx, test_arts
 
 def svd_predict_evaluate(train_df, test_df, num_latent_features, verbose=False):
+    '''
+    INPUT:
+    train_df - pandas.DataFrame, dataframe with interactions selected for training
+    test_df - pandas.DataFrame, dataframe with interactions selected for testing
+    num_latent_features - int, number of latent features to take into consideration
+    verbose - boolean, whether or not to print steps logs to std_out
+    
+    OUTPUT:
+    acc - float, accuracy of the model on the test set
+    '''
     
     if verbose: print('Creating test and train user-item matrices...')
     user_item_train, user_item_test, test_idx, test_arts = create_test_and_train_user_item(train_df, test_df)
@@ -532,7 +551,7 @@ def predict_user_item_int(user_matrix, article_matrix, s_matrix, num_latent_feat
     verbose - boolean, whether or not to print steps logs to std_out
     
     OUTPUT:
-    pred - the predicted interaction (0 or 1) for user_id-article_id according to SVD
+    pred_val - the predicted interaction (0 or 1) for user_id-article_id according to SVD
     '''
     # Use the training data to create a series of users and articles that matches the ordering in training data
     user_indices = users_articles_matrix.index
